@@ -6,11 +6,23 @@
 #define HTTP_MIME "text/html"
 #define HTTP_OK_CODE 200
 AsyncWebServer server(80);
+int mode = 0;
+int speed = 50;
 
+String processor(const String& var)
+{
+  char valBuffer[20];
+  if(var == "TREE_STATE"){
+    sprintf(valBuffer, "%d,%d", mode, speed);
+    return String(valBuffer);
+  }
+  
+  return String();
+}
 
 void handleIndexRequest(AsyncWebServerRequest *request){
   Serial.println("Sening main page");
-  request->send(HTTP_OK_CODE,HTTP_MIME, indexPage);
+  request->send_P(HTTP_OK_CODE,HTTP_MIME, indexPage, processor);
 }
 
 
