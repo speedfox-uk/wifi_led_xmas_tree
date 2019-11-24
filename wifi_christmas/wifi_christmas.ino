@@ -1,5 +1,6 @@
 #include <ESP8266WiFi.h>
 #include "ESPAsyncWebServer.h"
+#include <WiFiUdp.h>
 #include <FastLED.h>
 #include "./index.h"
 
@@ -22,6 +23,11 @@ boolean updateWiFi = false;
 int mode = 0;
 int speed = 50;
 int connectionStatus = WIFI_STATUS_CONNECTING;
+
+//UdpSetup
+WiFiUDP Client;
+#define UDP_PORT 2121
+char packetBuffer[512]; 
 
 //LedSetup
 #define NUM_LEDS 8
@@ -271,6 +277,7 @@ void setup()
   if(!connectToWiFi(false)){
     setupAp();
   }
+  Client.begin(UDP_PORT);
   setupWebServer();
 }
 
@@ -290,6 +297,13 @@ void loop()
   }
   else{
     itrPos++;
+  }
+
+  int noBytes = Client.parsePacket();
+  if(noBytes){
+    Client.read(packetBuffer,noBytes); 
+    Serial.print("Got Packet:");
+    Serial.println(packetBuffer);
   }
 
   delay(1);
