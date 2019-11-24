@@ -25,6 +25,7 @@ int speed = 50;
 int connectionStatus = WIFI_STATUS_CONNECTING;
 
 //UdpSetup
+#define GET_IP_CMD "getIp"
 WiFiUDP Client;
 #define UDP_PORT 2121
 char packetBuffer[512]; 
@@ -156,7 +157,7 @@ boolean connectToWiFi(boolean updateSettings){
   Serial.print("WiFi SSID:");
   Serial.println(WiFi.SSID());
   Serial.print("IP address:\t");  
-  Serial.println(WiFi.localIP());  
+  Serial.println(WiFi.localIP());
   return true;
 }
 
@@ -302,8 +303,20 @@ void loop()
   int noBytes = Client.parsePacket();
   if(noBytes){
     Client.read(packetBuffer,noBytes); 
-    Serial.print("Got Packet:");
-    Serial.println(packetBuffer);
+    Serial.print("Got Packet:'");
+    Serial.print(packetBuffer);
+    Serial.println("'");
+    if(0 == strcmp(GET_IP_CMD, packetBuffer) && connectionStatus != WIFI_STATUS_CONNECTING){
+      Client.beginPacket(Client.remoteIP(), UDP_PORT);
+      if(connectionStatus == WIFI_STATUS_CONNECTED){
+        Client.print(WiFi.localIP());
+      }
+      else if(connectionStatus == WIFI_STATUS_AP){
+        Client.print(WiFi.softAPIP());
+      }
+      
+      Client.endPacket();
+    }
   }
 
   delay(1);
