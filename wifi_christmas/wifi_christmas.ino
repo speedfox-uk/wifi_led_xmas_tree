@@ -10,15 +10,15 @@
 #define WIFI_STATUS_AP 0
 #define WIFI_STATUS_CONNECTING 1
 #define WIFI_STATUS_CONNECTED 2
+#define WIFI_CONNECTION_TIMEOUT_SECONDS 30
 AsyncWebServer server(80);
 const char* TOKENS_PLACEHOLDER = "*TREE_STATE*";
 const char* BAD_RESPONSE = "BAD";
 char apName[50];
 char apPassword[50];
-boolean connectToWiFi = false;
 int mode = 0;
 int speed = 50;
-int connectionStatus = WIFI_STATUS_AP;
+int connectionStatus = WIFI_STATUS_CONNECTING;
 
 String processor(const String& var)
 {
@@ -76,7 +76,9 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println();  
-  setupAp();
+  if(!connectToWiFi(false)){
+    setupAp();
+  }
   setupWebServer();
 }
 
@@ -94,9 +96,11 @@ void setupWebServer(){
 void setupAp()
 {
   Serial.print("Setting soft-AP ... ");
+  WiFi.mode(WIFI_AP);
   boolean result = WiFi.softAP(AP_NAME);
   if(result == true)
   {
+    connectionStatus = WIFI_STATUS_AP;
     Serial.println("Ready");
     Serial.println(WiFi.softAPIP());
   }
@@ -104,6 +108,37 @@ void setupAp()
   {
     Serial.println("Failed!");
   }
+}
+
+boolean connectToWiFi(boolean updateSettings){
+  WiFi.mode(WIFI_STA);
+  if(updateSettings)
+  {
+      WiFi.begin(apName, apPassword);
+  }
+  else
+  {
+      WiFi.begin();
+  }
+  //while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
+  for(int i=0; i< WIFI_CONNECTION_TIMEOUT_SECONDS; i++){
+    if(WiFi.status() == WL_CONNECTED){
+      break;
+    }
+    delay(1000);
+    Serial.print('.');
+  }
+
+  if(WiFi.status() != WL_CONNECTED){
+    Serial.println("Connection to wifi failed");
+    return false;
+  }
+  Serial.println("Connection established!");
+  Serial.print("WiFi SSID:");
+  Serial.println(WiFi.SSID());
+  Serial.print("IP address:\t");  
+  Serial.println(WiFi.localIP());  
+  return true;
 }
 
 void loop()
