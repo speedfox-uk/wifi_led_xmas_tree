@@ -12,12 +12,13 @@ const char* tokens_placeholder = "*TREE_STATE*";
 const char* bad_response = "BAD";
 int mode = 0;
 int speed = 50;
+int isConnected = 0;
 
 String processor(const String& var)
 {
   char valBuffer[20];
   if(var == "TREE_STATE"){
-    sprintf(valBuffer, "%d,%d", mode, speed);
+    sprintf(valBuffer, "%d,%d,%d", mode, speed, isConnected);
     return String(valBuffer);
   }
   

@@ -14,6 +14,8 @@ modeElem.innerHTML=modeNames[parts[0]];\
 speedElem.innerHTML=parts[1];\
 speedFinderElem.value=parts[1];\
 }\
+function doConnect(){\
+}\
 function setMode(modeNum){\
 var x = new XMLHttpRequest();\
 x.onload = function(){console.log(\"resp\" + this.response); updateState(this.response);};\
@@ -40,6 +42,11 @@ updateState('*TREE_STATE*');\
 <button style=\"width:25%\" onclick=\"setMode(0)\">Chase</button><button style=\"width:25%\" onclick=\"setMode(1)\">Rainbow</button><button style=\"width:25%\" onclick=\"setMode(2)\">Double Peaks</button><button style=\"width:25%\" onclick=\"setMode(3)\">Off</button>\
 <p>Current Speed:<span id=\"speed\"></span></p>\
 <input id=\"speedFinder\" type=\"range\" onmouseup=\"setSpeed()\" ontouchend=\"setSpeed()\" min=\"0\" max=\"100\"/>\
+<div id='apDetails'>\
+<p>WiFi Name: <input class=\"wifi_input\" type='text'></p>\
+<p>WiFi Password: <input class = \"wifi_input\" type='text'></p>\
+<p><button onclick=\"doConnect()\">Connect</button></p>\
+</div>\
 </body>\
 </html>\
 ";
