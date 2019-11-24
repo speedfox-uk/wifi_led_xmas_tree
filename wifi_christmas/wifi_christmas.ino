@@ -141,6 +141,7 @@ boolean connectToWiFi(boolean updateSettings){
     Serial.println("Connection to wifi failed");
     return false;
   }
+  connectionStatus = WIFI_STATUS_CONNECTED;
   Serial.println("Connection established!");
   Serial.print("WiFi SSID:");
   Serial.println(WiFi.SSID());
@@ -153,6 +154,8 @@ void loop()
 {
   if(updateWiFi){
     updateWiFi = false;
-    connectToWiFi(true);
+    if(!connectToWiFi(true)){
+      setupAp();
+    }
   }
 }
