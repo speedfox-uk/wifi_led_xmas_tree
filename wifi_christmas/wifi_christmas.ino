@@ -5,7 +5,11 @@
 #define AP_NAME "WifiChristmasTree"
 #define HTTP_MIME "text/html"
 #define HTTP_OK_CODE 200
+#define HTTP_ERROR_CODE 500
+#define HTTP_NOTFOUND_CODE 404
 AsyncWebServer server(80);
+const char* tokens_placeholder = "*TREE_STATE*";
+const char* bad_response = "BAD";
 int mode = 0;
 int speed = 50;
 
@@ -22,7 +26,33 @@ String processor(const String& var)
 
 void handleIndexRequest(AsyncWebServerRequest *request){
   Serial.println("Sening main page");
-  request->send_P(HTTP_OK_CODE,HTTP_MIME, indexPage, processor);
+  request->send_P(HTTP_OK_CODE, HTTP_MIME, indexPage, processor);
+}
+
+void handleSetSpeed(AsyncWebServerRequest *request){
+  if(request->hasParam("speed")){
+    String arg = request->arg("speed");
+    speed = arg.toInt();
+    Serial.print("Speed updated to ");
+    Serial.println(speed);
+    request->send_P(HTTP_OK_CODE, HTTP_MIME, tokens_placeholder, processor);
+  }
+  else{
+    request->send_P(HTTP_ERROR_CODE, HTTP_MIME, bad_response);
+  }
+}
+
+void handleSetMode(AsyncWebServerRequest *request){
+  if(request->hasParam("mode")){
+    String arg = request->arg("mode");
+    mode = arg.toInt();
+    Serial.print("Mode updated to ");
+    Serial.println(mode);
+    request->send_P(HTTP_OK_CODE, HTTP_MIME, tokens_placeholder, processor);
+  }
+  else{
+    request->send_P(HTTP_ERROR_CODE, HTTP_MIME, bad_response);
+  }
 }
 
 
@@ -37,6 +67,8 @@ void setup()
 void setupWebServer(){
   server.on("/", HTTP_ANY, handleIndexRequest);
   server.on("/index.html", HTTP_ANY, handleIndexRequest);
+  server.on("/setSpeed", HTTP_ANY, handleSetSpeed);
+  server.on("/setMode", HTTP_ANY, handleSetMode);
   server.begin(); 
 }
 

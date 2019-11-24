@@ -38,7 +38,7 @@ updateState('*TREE_STATE*');\
 <p>Current Mode:<span id=\"modeName\"></span></p>\
 <button style=\"width:25%\" onclick=\"setMode(0)\">Chase</button><button style=\"width:25%\" onclick=\"setMode(1)\">Rainbow</button><button style=\"width:25%\" onclick=\"setMode(2)\">Double Peaks</button><button style=\"width:25%\" onclick=\"setMode(3)\">Off</button>\
 <p>Current Speed:<span id=\"speed\"></span></p>\
-<input id=\"speedFinder\" type=\"range\" onmouseup=\"setSpeed()\" min=\"0\" max=\"100\"/>\
+<input id=\"speedFinder\" type=\"range\" onmouseup=\"setSpeed()\" ontouchend=\"setSpeed()\" min=\"0\" max=\"100\"/>\
 </body>\
 </html>\
 ";
