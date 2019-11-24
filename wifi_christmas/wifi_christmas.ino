@@ -7,18 +7,24 @@
 #define HTTP_OK_CODE 200
 #define HTTP_ERROR_CODE 500
 #define HTTP_NOTFOUND_CODE 404
+#define WIFI_STATUS_AP 0
+#define WIFI_STATUS_CONNECTING 1
+#define WIFI_STATUS_CONNECTED 2
 AsyncWebServer server(80);
-const char* tokens_placeholder = "*TREE_STATE*";
-const char* bad_response = "BAD";
+const char* TOKENS_PLACEHOLDER = "*TREE_STATE*";
+const char* BAD_RESPONSE = "BAD";
+char apName[50];
+char apPassword[50];
+boolean connectToWiFi = false;
 int mode = 0;
 int speed = 50;
-int isConnected = 0;
+int connectionStatus = WIFI_STATUS_AP;
 
 String processor(const String& var)
 {
   char valBuffer[20];
   if(var == "TREE_STATE"){
-    sprintf(valBuffer, "%d,%d,%d", mode, speed, isConnected);
+    sprintf(valBuffer, "%d,%d,%d", mode, speed, connectionStatus);
     return String(valBuffer);
   }
   
@@ -36,10 +42,10 @@ void handleSetSpeed(AsyncWebServerRequest *request){
     speed = arg.toInt();
     Serial.print("Speed updated to ");
     Serial.println(speed);
-    request->send_P(HTTP_OK_CODE, HTTP_MIME, tokens_placeholder, processor);
+    request->send_P(HTTP_OK_CODE, HTTP_MIME, TOKENS_PLACEHOLDER, processor);
   }
   else{
-    request->send_P(HTTP_ERROR_CODE, HTTP_MIME, bad_response);
+    request->send_P(HTTP_ERROR_CODE, HTTP_MIME, BAD_RESPONSE);
   }
 }
 
@@ -49,11 +55,20 @@ void handleSetMode(AsyncWebServerRequest *request){
     mode = arg.toInt();
     Serial.print("Mode updated to ");
     Serial.println(mode);
-    request->send_P(HTTP_OK_CODE, HTTP_MIME, tokens_placeholder, processor);
+    request->send_P(HTTP_OK_CODE, HTTP_MIME, TOKENS_PLACEHOLDER, processor);
   }
   else{
-    request->send_P(HTTP_ERROR_CODE, HTTP_MIME, bad_response);
+    request->send_P(HTTP_ERROR_CODE, HTTP_MIME, BAD_RESPONSE);
   }
+}
+
+void handleConnect(AsyncWebServerRequest *request){
+  connectionStatus = WIFI_STATUS_CONNECTING;
+  request->send_P(HTTP_OK_CODE, HTTP_MIME, TOKENS_PLACEHOLDER, processor);
+}
+
+void handleGetStatus(AsyncWebServerRequest *request){
+  request->send_P(HTTP_OK_CODE, HTTP_MIME, TOKENS_PLACEHOLDER, processor);
 }
 
 
@@ -70,6 +85,8 @@ void setupWebServer(){
   server.on("/index.html", HTTP_ANY, handleIndexRequest);
   server.on("/setSpeed", HTTP_ANY, handleSetSpeed);
   server.on("/setMode", HTTP_ANY, handleSetMode);
+  server.on("/connect", HTTP_ANY, handleConnect);
+  server.on("/getStatus", HTTP_ANY, handleGetStatus);
   server.begin(); 
 }
 
@@ -91,6 +108,6 @@ void setupAp()
 
 void loop()
 {
-  Serial.printf("Stations connected = %d\n", WiFi.softAPgetStationNum());
-  delay(3000);
+  if(connectToWiFi){
+  }
 }
