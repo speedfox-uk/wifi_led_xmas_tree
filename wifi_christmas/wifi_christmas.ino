@@ -14,8 +14,9 @@
 AsyncWebServer server(80);
 const char* TOKENS_PLACEHOLDER = "*TREE_STATE*";
 const char* BAD_RESPONSE = "BAD";
-char apName[50];
-char apPassword[50];
+unsigned char apName[50];
+unsigned char apPassword[50];
+boolean updateWiFi = false;
 int mode = 0;
 int speed = 50;
 int connectionStatus = WIFI_STATUS_CONNECTING;
@@ -63,8 +64,15 @@ void handleSetMode(AsyncWebServerRequest *request){
 }
 
 void handleConnect(AsyncWebServerRequest *request){
-  connectionStatus = WIFI_STATUS_CONNECTING;
-  request->send_P(HTTP_OK_CODE, HTTP_MIME, TOKENS_PLACEHOLDER, processor);
+  if(request->hasParam("apName") && request->hasParam("apPassword")){
+      connectionStatus = WIFI_STATUS_CONNECTING;
+      request->arg("apName").getBytes(apName, sizeof(apName));
+      request->arg("apPassword").getBytes(apPassword, sizeof(apPassword));
+      updateWiFi = true;
+      request->send_P(HTTP_OK_CODE, HTTP_MIME, TOKENS_PLACEHOLDER, processor);   
+  }else{
+      request->send_P(HTTP_ERROR_CODE, HTTP_MIME, TOKENS_PLACEHOLDER, processor);   
+  }
 }
 
 void handleGetStatus(AsyncWebServerRequest *request){
@@ -114,13 +122,13 @@ boolean connectToWiFi(boolean updateSettings){
   WiFi.mode(WIFI_STA);
   if(updateSettings)
   {
-      WiFi.begin(apName, apPassword);
+      WiFi.begin((char*)apName, (char*)apPassword);
   }
   else
   {
       WiFi.begin();
   }
-  //while (WiFi.status() != WL_CONNECTED) { // Wait for the Wi-Fi to connect
+  
   for(int i=0; i< WIFI_CONNECTION_TIMEOUT_SECONDS; i++){
     if(WiFi.status() == WL_CONNECTED){
       break;
@@ -143,6 +151,8 @@ boolean connectToWiFi(boolean updateSettings){
 
 void loop()
 {
-  if(connectToWiFi){
+  if(updateWiFi){
+    updateWiFi = false;
+    connectToWiFi(true);
   }
 }
